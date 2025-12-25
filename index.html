@@ -63,14 +63,9 @@
         .matching-right select { width: 100%; padding: 12px; font-size: 18px; border-radius: 5px; border: 1px solid #ccc; }
 
         #result-screen { display: none; }
-        #result-screen h2 { font-size: 36px; margin-bottom: 20px; }
         #result-score { font-size: 52px; font-weight: bold; color: #28a745; margin: 30px 0; }
         #result-text { font-size: 22px; margin: 20px 0; }
-        #restart-btn {
-            padding: 18px 50px;
-            font-size: 24px;
-            background: #28a745;
-        }
+        #restart-btn { padding: 18px 50px; font-size: 24px; background: #28a745; }
         #restart-btn:hover { background: #218838; }
     </style>
 </head>
@@ -79,7 +74,7 @@
     <div id="start-screen">
         <h1>Тренажёр сопоставлений</h1>
         <p>7 вопросов по кибербезопасности</p>
-        <p>Полностью случайный порядок: вопросов, левых элементов и вариантов</p>
+        <p>Порядок вопросов и вариантов в списках — случайный</p>
         <button id="start-btn">СТАРТ</button>
     </div>
 
@@ -101,7 +96,7 @@
     </div>
 
     <script>
-        const originalQuestions = [
+        const questions = [
             {
                 type: 'matching',
                 question: '10. Match the healthcare sector term to the respective description.',
@@ -210,8 +205,7 @@
             startScreen.style.display = 'none';
             quizContainer.style.display = 'block';
 
-            // Перемешиваем вопросы
-            shuffledQuestions = [...originalQuestions].sort(() => Math.random() - 0.5);
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
             currentQuestionIndex = 0;
             correctAnswersCount = 0;
 
@@ -219,26 +213,7 @@
         }
 
         function loadQuestion() {
-            const baseQuestion = shuffledQuestions[currentQuestionIndex];
-
-            // Создаём копию с перемешанными left и right
-            const currentQuestion = JSON.parse(JSON.stringify(baseQuestion));
-
-            // Перемешиваем left (то, что нужно соединять)
-            const shuffledLeftIndices = currentQuestion.left.map((_, idx) => idx);
-            for (let i = shuffledLeftIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledLeftIndices[i], shuffledLeftIndices[j]] = [shuffledLeftIndices[j], shuffledLeftIndices[i]];
-            }
-
-            const shuffledLeft = shuffledLeftIndices.map(i => currentQuestion.left[i]);
-
-            // Корректируем correct под новый порядок left
-            const newCorrect = {};
-            shuffledLeftIndices.forEach((oldIndex, newIndex) => {
-                newCorrect[newIndex] = currentQuestion.correct[oldIndex];
-            });
-            currentQuestion.correct = newCorrect;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
 
             document.getElementById('question-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из 7`;
             document.getElementById('question').textContent = currentQuestion.question;
@@ -252,7 +227,7 @@
             const table = document.createElement('table');
             table.classList.add('matching-table');
 
-            shuffledLeft.forEach((leftItem, index) => {
+            currentQuestion.left.forEach((leftItem, index) => {
                 const row = document.createElement('tr');
 
                 const leftTd = document.createElement('td');
@@ -269,14 +244,14 @@
                 const rightTd = document.createElement('td');
                 rightTd.classList.add('matching-right');
                 const select = document.createElement('select');
-                select.dataset.leftIndex = index; // индекс в перемешанном left
+                select.dataset.leftIndex = index;
 
                 const defaultOpt = document.createElement('option');
                 defaultOpt.value = '';
                 defaultOpt.textContent = '-- выберите --';
                 select.appendChild(defaultOpt);
 
-                // Перемешиваем right
+                // Перемешиваем только правые варианты
                 const shuffledRight = [...currentQuestion.right];
                 for (let i = shuffledRight.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -285,7 +260,7 @@
 
                 shuffledRight.forEach(item => {
                     const opt = document.createElement('option');
-                    opt.value = currentQuestion.right.indexOf(item);
+                    opt.value = currentQuestion.right.indexOf(item); // оригинальный индекс
                     opt.textContent = item;
                     select.appendChild(opt);
                 });
@@ -300,9 +275,7 @@
         }
 
         function checkAnswer() {
-            const baseQuestion = shuffledQuestions[currentQuestionIndex];
-            const currentCorrect = baseQuestion.correct; // уже скорректирован под перемешанный left
-
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
             const selects = document.querySelectorAll('select');
             const userMatches = {};
             let allSelected = true;
@@ -319,8 +292,8 @@
                 return;
             }
 
-            let isCorrect = Object.keys(currentCorrect).every(key => 
-                currentCorrect[key] === userMatches[key]
+            let isCorrect = Object.keys(currentQuestion.correct).every(key => 
+                currentQuestion.correct[key] === userMatches[key]
             );
 
             submitBtn.style.display = 'none';
@@ -332,14 +305,14 @@
                 nextBtn.style.display = 'inline';
             } else {
                 document.getElementById('quiz-container').classList.add('incorrect');
-                document.getElementById('feedback').innerHTML = '<strong>Неправильно.</strong><br>Правильные пары:<br>' + getCorrectAnswerText(baseQuestion);
+                document.getElementById('feedback').innerHTML = '<strong>Неправильно.</strong><br>Правильные пары:<br>' + getCorrectAnswerText(currentQuestion);
                 retryBtn.style.display = 'inline';
             }
         }
 
         function getCorrectAnswerText(q) {
             return Object.entries(q.correct)
-                .map(([leftIdx, rightIdx]) => `${q.left[leftIdx]} → ${q.right[rightIdx]}`)
+                .map(([left, right]) => `${q.left[left]} → ${q.right[right]}`)
                 .join('<br>');
         }
 
@@ -349,7 +322,7 @@
 
         function nextQuestion() {
             currentQuestionIndex++;
-            if (currentQuestionIndex < originalQuestions.length) {
+            if (currentQuestionIndex < questions.length) {
                 loadQuestion();
             } else {
                 showResult();
@@ -360,7 +333,7 @@
             quizContainer.style.display = 'none';
             resultScreen.style.display = 'block';
 
-            const percentage = Math.round((correctAnswersCount / originalQuestions.length) * 100);
+            const percentage = Math.round((correctAnswersCount / questions.length) * 100);
 
             document.getElementById('result-score').textContent = `${correctAnswersCount} из 7`;
             document.getElementById('result-text').innerHTML = `
