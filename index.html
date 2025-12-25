@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подготовка к сессии — 7 вопросов</title>
+    <title>Подготовка к сессии — 7 вопросов сопоставления</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,25 +39,7 @@
         #quiz-container { display: none; }
         .question-number { font-size: 20px; color: #555; margin-bottom: 15px; }
         .question { font-size: 22px; margin-bottom: 25px; font-weight: bold; }
-        .options { margin-bottom: 30px; text-align: left; }
-        .option {
-            display: block;
-            margin-bottom: 16px;
-            font-size: 18px;
-            padding-left: 5px;
-        }
-        .option input {
-            margin-right: 12px;
-            transform: scale(1.3);
-        }
-        .option::before {
-            content: "•";
-            color: #333;
-            font-weight: bold;
-            display: inline-block;
-            width: 1.5em;
-            margin-left: -1.5em;
-        }
+        .options { margin-bottom: 30px; }
         #feedback { font-weight: bold; margin: 20px 0; min-height: 40px; font-size: 20px; }
         button {
             padding: 14px 30px;
@@ -95,9 +77,9 @@
 <body>
 
     <div id="start-screen">
-        <h1>Подготовка к сессии</h1>
+        <h1>Тренажёр сопоставлений</h1>
         <p>7 вопросов по кибербезопасности</p>
-        <p>Вопросы и варианты ответов в случайном порядке</p>
+        <p>Полностью случайный порядок: вопросов, левых элементов и вариантов</p>
         <button id="start-btn">СТАРТ</button>
     </div>
 
@@ -119,15 +101,91 @@
     </div>
 
     <script>
-        const questions = [
-            { type: 'matching', question: '10. Match the healthcare sector term to the respective description.', left: ['Healthcare provider','Business associates','Health plan','Healthcare clearinghouse'], right: ['A person or an organization that provides patient or medical services','A person or organization that performs certain functions involving the use of PHI on behalf of, or provides services to, a covered entity','A government program that pays for healthcare','An entity that processes nonstandard health information it receives from another entity into a standard format'], correct: {0:0,1:1,2:2,3:3} },
-            { type: 'matching', question: '14. Match penetration testing methodology and standard with the respective description.', left: ['OSSTMM','NIST','MITRE ATT&CK','OWASP WSTG'], right: ['This is a peer-reviewed security testing methodology maintained by the Institute for Security and Open Methodologies (ISECOM).','This is a document created to provide organizations with guidelines on planning and conducting information security testing.','This is a resource for learning about the tactics of an adversary, techniques, and procedures (TTPs).','This is a compilation of high-level phases of web application security testing and digs deeper into the testing methods used.'], correct: {0:0,1:1,2:2,3:3} },
-            { type: 'matching', question: '30. Match the cloud attack to the description.', left: ['Credential Harvesting','Account Takeover','Privilege Escalation'], right: ['Act of gathering and stealing valid usernames, passwords, tokens, PINs, and any other types of credentials through infrastructure breaches','When a threat actor gains access to a user or application account and uses it to then gain access to more accounts and information','Act of exploiting a bug or design flaw in a software or firmware application to gain access to resources that normally would have been protected from an application or a user'], correct: {0:0,1:1,2:2} },
-            { type: 'matching', question: '32. Match the mobile device security testing tool to the description.', left: ['Drozer','Needle','ApkX','Burp Suite'], right: ['This Android testing platform and framework provides access to numerous exploits that can be used to attack Android platforms.','This open-source framework is used to test the security of iOS applications.','This tool enables you to decompile Android application package files.','This can test mobile applications and determine how they communicate with web services and APIs.'], correct: {0:0,1:1,2:2,3:3} },
-            { type: 'matching', question: '33. Match the mobile device attack to the description.', left: ['Spamming','Reverse engineering','Sandbox analysis'], right: ['This presents users with links to redirect them to malicious sites to steal sensitive information or install malware.','This is the process of analyzing a mobile app to extract information about the source code to understand the underlying architecture of a mobile application and potentially manipulate the mobile device.','This can enable a threat actor to bypass the access control mechanisms implemented by Android, Apple iOS, and mobile app developers.'], correct: {0:0,1:1,2:2} },
-            { type: 'matching', question: '35. Match the insecure code practice to the description.', left: ['Lack of error handling and overly verbose error handling','Comments in source code','Unprotected APIs','Hard-coded credentials'], right: ['A type of weakness and security malpractice that can provide information to help an attacker perform additional attacks on the targeted system.','Developers include information in source code that could provide too much information and might be leveraged by an attacker.','Many APIs lack adequate controls and are difficult to monitor. The breadth and complexity of APIs also make it difficult to automate effective security testing.','A catastrophic flaw that an attacker can leverage to completely compromise an application or the underlying system.'], correct: {0:0,1:1,2:2,3:3} },
-            { type: 'matching', question: '38. Match the PowerSploit module/script to the respective description.', left: ['Invoke-Portscan','Set-CriticalProcess','PowerView','Get-VaultCredential','PowerUp'], right: ['Does a simple TCP port scan using regular sockets, based rather loosely on Nmap','Causes the machine to blue screen upon exiting PowerShell','Performs network and Windows domain enumeration and exploitation','Displays Windows vault credential objects, including plaintext web credentials','Acts as clearinghouse of common privilege escalation checks, along with some weaponization vectors'], correct: {0:0,1:1,2:2,3:3,4:4} }
-           ];
+        const originalQuestions = [
+            {
+                type: 'matching',
+                question: '10. Match the healthcare sector term to the respective description.',
+                left: ['Healthcare provider', 'Business associates', 'Health plan', 'Healthcare clearinghouse'],
+                right: [
+                    'A person or an organization that provides patient or medical services',
+                    'A person or organization that performs certain functions involving the use of PHI on behalf of, or provides services to, a covered entity',
+                    'A government program that pays for healthcare',
+                    'An entity that processes nonstandard health information it receives from another entity into a standard format'
+                ],
+                correct: {0:0, 1:1, 2:2, 3:3}
+            },
+            {
+                type: 'matching',
+                question: '14. Match penetration testing methodology and standard with the respective description.',
+                left: ['OSSTMM', 'NIST', 'MITRE ATT&CK', 'OWASP WSTG'],
+                right: [
+                    'This is a peer-reviewed security testing methodology maintained by the Institute for Security and Open Methodologies (ISECOM).',
+                    'This is a document created to provide organizations with guidelines on planning and conducting information security testing.',
+                    'This is a resource for learning about the tactics of an adversary, techniques, and procedures (TTPs).',
+                    'This is a compilation of high-level phases of web application security testing and digs deeper into the testing methods used.'
+                ],
+                correct: {0:0, 1:1, 2:2, 3:3}
+            },
+            {
+                type: 'matching',
+                question: '30. Match the cloud attack to the description.',
+                left: ['Credential Harvesting', 'Account Takeover', 'Privilege Escalation'],
+                right: [
+                    'Act of gathering and stealing valid usernames, passwords, tokens, PINs, and any other types of credentials through infrastructure breaches',
+                    'When a threat actor gains access to a user or application account and uses it to then gain access to more accounts and information',
+                    'Act of exploiting a bug or design flaw in a software or firmware application to gain access to resources that normally would have been protected from an application or a user'
+                ],
+                correct: {0:0, 1:1, 2:2}
+            },
+            {
+                type: 'matching',
+                question: '32. Match the mobile device security testing tool to the description.',
+                left: ['Drozer', 'Needle', 'ApkX', 'Burp Suite'],
+                right: [
+                    'This Android testing platform and framework provides access to numerous exploits that can be used to attack Android platforms.',
+                    'This open-source framework is used to test the security of iOS applications.',
+                    'This tool enables you to decompile Android application package files.',
+                    'This can test mobile applications and determine how they communicate with web services and APIs.'
+                ],
+                correct: {0:0, 1:1, 2:2, 3:3}
+            },
+            {
+                type: 'matching',
+                question: '33. Match the mobile device attack to the description.',
+                left: ['Spamming', 'Reverse engineering', 'Sandbox analysis'],
+                right: [
+                    'This presents users with links to redirect them to malicious sites to steal sensitive information or install malware.',
+                    'This is the process of analyzing a mobile app to extract information about the source code to understand the underlying architecture of a mobile application and potentially manipulate the mobile device.',
+                    'This can enable a threat actor to bypass the access control mechanisms implemented by Android, Apple iOS, and mobile app developers.'
+                ],
+                correct: {0:0, 1:1, 2:2}
+            },
+            {
+                type: 'matching',
+                question: '35. Match the insecure code practice to the description.',
+                left: ['Lack of error handling and overly verbose error handling', 'Comments in source code', 'Unprotected APIs', 'Hard-coded credentials'],
+                right: [
+                    'A type of weakness and security malpractice that can provide information to help an attacker perform additional attacks on the targeted system.',
+                    'Developers include information in source code that could provide too much information and might be leveraged by an attacker.',
+                    'Many APIs lack adequate controls and are difficult to monitor. The breadth and complexity of APIs also make it difficult to automate effective security testing.',
+                    'A catastrophic flaw that an attacker can leverage to completely compromise an application or the underlying system.'
+                ],
+                correct: {0:0, 1:1, 2:2, 3:3}
+            },
+            {
+                type: 'matching',
+                question: '38. Match the PowerSploit module/script to the respective description.',
+                left: ['Invoke-Portscan', 'Set-CriticalProcess', 'PowerView', 'Get-VaultCredential', 'PowerUp'],
+                right: [
+                    'Does a simple TCP port scan using regular sockets, based rather loosely on Nmap',
+                    'Causes the machine to blue screen upon exiting PowerShell',
+                    'Performs network and Windows domain enumeration and exploitation',
+                    'Displays Windows vault credential objects, including plaintext web credentials',
+                    'Acts as clearinghouse of common privilege escalation checks, along with some weaponization vectors'
+                ],
+                correct: {0:0, 1:1, 2:2, 3:3, 4:4}
+            }
+        ];
 
         let shuffledQuestions = [];
         let currentQuestionIndex = 0;
@@ -152,7 +210,8 @@
             startScreen.style.display = 'none';
             quizContainer.style.display = 'block';
 
-            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            // Перемешиваем вопросы
+            shuffledQuestions = [...originalQuestions].sort(() => Math.random() - 0.5);
             currentQuestionIndex = 0;
             correctAnswersCount = 0;
 
@@ -160,9 +219,28 @@
         }
 
         function loadQuestion() {
-            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const baseQuestion = shuffledQuestions[currentQuestionIndex];
 
-            document.getElementById('question-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из 7(SIUUUU)`;
+            // Создаём копию с перемешанными left и right
+            const currentQuestion = JSON.parse(JSON.stringify(baseQuestion));
+
+            // Перемешиваем left (то, что нужно соединять)
+            const shuffledLeftIndices = currentQuestion.left.map((_, idx) => idx);
+            for (let i = shuffledLeftIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledLeftIndices[i], shuffledLeftIndices[j]] = [shuffledLeftIndices[j], shuffledLeftIndices[i]];
+            }
+
+            const shuffledLeft = shuffledLeftIndices.map(i => currentQuestion.left[i]);
+
+            // Корректируем correct под новый порядок left
+            const newCorrect = {};
+            shuffledLeftIndices.forEach((oldIndex, newIndex) => {
+                newCorrect[newIndex] = currentQuestion.correct[oldIndex];
+            });
+            currentQuestion.correct = newCorrect;
+
+            document.getElementById('question-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из 7`;
             document.getElementById('question').textContent = currentQuestion.question;
             document.getElementById('options').innerHTML = '';
             document.getElementById('feedback').innerHTML = '';
@@ -171,104 +249,79 @@
             retryBtn.style.display = 'none';
             nextBtn.style.display = 'none';
 
-            if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
-                const shuffled = currentQuestion.options.map((opt, idx) => ({opt, idx}));
-                for (let i = shuffled.length - 1; i > 0; i--) {
+            const table = document.createElement('table');
+            table.classList.add('matching-table');
+
+            shuffledLeft.forEach((leftItem, index) => {
+                const row = document.createElement('tr');
+
+                const leftTd = document.createElement('td');
+                leftTd.classList.add('matching-left');
+                leftTd.textContent = leftItem;
+                row.appendChild(leftTd);
+
+                const arrowTd = document.createElement('td');
+                arrowTd.textContent = '→';
+                arrowTd.style.textAlign = 'center';
+                arrowTd.style.fontWeight = 'bold';
+                row.appendChild(arrowTd);
+
+                const rightTd = document.createElement('td');
+                rightTd.classList.add('matching-right');
+                const select = document.createElement('select');
+                select.dataset.leftIndex = index; // индекс в перемешанном left
+
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = '-- выберите --';
+                select.appendChild(defaultOpt);
+
+                // Перемешиваем right
+                const shuffledRight = [...currentQuestion.right];
+                for (let i = shuffledRight.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    [shuffledRight[i], shuffledRight[j]] = [shuffledRight[j], shuffledRight[i]];
                 }
 
-                shuffled.forEach(item => {
-                    const label = document.createElement('label');
-                    label.classList.add('option');
-                    const input = document.createElement('input');
-                    input.type = currentQuestion.type === 'single' ? 'radio' : 'checkbox';
-                    input.name = 'answer';
-                    input.value = item.idx;
-                    label.appendChild(input);
-                    label.appendChild(document.createTextNode(' ' + item.opt));
-                    document.getElementById('options').appendChild(label);
-                });
-            } else if (currentQuestion.type === 'matching') {
-                const table = document.createElement('table');
-                table.classList.add('matching-table');
-
-                currentQuestion.left.forEach((leftItem, index) => {
-                    const row = document.createElement('tr');
-                    const leftTd = document.createElement('td');
-                    leftTd.classList.add('matching-left');
-                    leftTd.textContent = leftItem;
-                    row.appendChild(leftTd);
-
-                    const arrowTd = document.createElement('td');
-                    arrowTd.textContent = '→';
-                    arrowTd.style.textAlign = 'center';
-                    arrowTd.style.fontWeight = 'bold';
-                    row.appendChild(arrowTd);
-
-                    const rightTd = document.createElement('td');
-                    rightTd.classList.add('matching-right');
-                    const select = document.createElement('select');
-                    select.dataset.leftIndex = index;
-
-                    const defaultOpt = document.createElement('option');
-                    defaultOpt.value = '';
-                    defaultOpt.textContent = '-- выберите --';
-                    select.appendChild(defaultOpt);
-
-                    const shuffledRight = [...currentQuestion.right];
-                    for (let i = shuffledRight.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffledRight[i], shuffledRight[j]] = [shuffledRight[j], shuffledRight[i]];
-                    }
-
-                    shuffledRight.forEach(item => {
-                        const opt = document.createElement('option');
-                        opt.value = currentQuestion.right.indexOf(item);
-                        opt.textContent = item;
-                        select.appendChild(opt);
-                    });
-
-                    rightTd.appendChild(select);
-                    row.appendChild(rightTd);
-                    table.appendChild(row);
+                shuffledRight.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = currentQuestion.right.indexOf(item);
+                    opt.textContent = item;
+                    select.appendChild(opt);
                 });
 
-                document.getElementById('options').appendChild(table);
-            }
+                rightTd.appendChild(select);
+                row.appendChild(rightTd);
+
+                table.appendChild(row);
+            });
+
+            document.getElementById('options').appendChild(table);
         }
 
         function checkAnswer() {
-            const currentQuestion = shuffledQuestions[currentQuestionIndex];
-            let isCorrect = false;
+            const baseQuestion = shuffledQuestions[currentQuestionIndex];
+            const currentCorrect = baseQuestion.correct; // уже скорректирован под перемешанный left
 
-            if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
-                const selected = Array.from(document.querySelectorAll('input[name="answer"]:checked'))
-                    .map(input => parseInt(input.value));
-                const correctSorted = [...currentQuestion.correct].sort((a,b) => a-b);
-                const selectedSorted = [...selected].sort((a,b) => a-b);
-                isCorrect = JSON.stringify(selectedSorted) === JSON.stringify(correctSorted);
-            } else if (currentQuestion.type === 'matching') {
-                const selects = document.querySelectorAll('select');
-                const userMatches = {};
-                let allSelected = true;
+            const selects = document.querySelectorAll('select');
+            const userMatches = {};
+            let allSelected = true;
 
-                selects.forEach(select => {
-                    const leftIndex = parseInt(select.dataset.leftIndex);
-                    const selectedValue = parseInt(select.value);
-                    if (select.value === '') allSelected = false;
-                    userMatches[leftIndex] = selectedValue;
-                });
+            selects.forEach(select => {
+                const leftIndex = parseInt(select.dataset.leftIndex);
+                const selectedValue = parseInt(select.value);
+                if (select.value === '') allSelected = false;
+                userMatches[leftIndex] = selectedValue;
+            });
 
-                if (!allSelected) {
-                    document.getElementById('feedback').innerHTML = '<strong>Выберите ответ для всех строк!</strong>';
-                    return;
-                }
-
-                isCorrect = Object.keys(currentQuestion.correct).every(key => 
-                    currentQuestion.correct[key] === userMatches[key]
-                );
+            if (!allSelected) {
+                document.getElementById('feedback').innerHTML = '<strong>Выберите ответ для всех строк!</strong>';
+                return;
             }
+
+            let isCorrect = Object.keys(currentCorrect).every(key => 
+                currentCorrect[key] === userMatches[key]
+            );
 
             submitBtn.style.display = 'none';
 
@@ -279,20 +332,15 @@
                 nextBtn.style.display = 'inline';
             } else {
                 document.getElementById('quiz-container').classList.add('incorrect');
-                document.getElementById('feedback').innerHTML = '<strong>Неправильно.</strong> Правильный ответ: ' + getCorrectAnswerText(currentQuestion);
+                document.getElementById('feedback').innerHTML = '<strong>Неправильно.</strong><br>Правильные пары:<br>' + getCorrectAnswerText(baseQuestion);
                 retryBtn.style.display = 'inline';
             }
         }
 
         function getCorrectAnswerText(q) {
-            if (q.type === 'single' || q.type === 'multiple') {
-                return q.correct.map(i => q.options[i]).join(', ');
-            } else if (q.type === 'matching') {
-                return Object.entries(q.correct)
-                    .map(([left, right]) => `${q.left[left]} → ${q.right[right]}`)
-                    .join('<br>');
-            }
-            return '';
+            return Object.entries(q.correct)
+                .map(([leftIdx, rightIdx]) => `${q.left[leftIdx]} → ${q.right[rightIdx]}`)
+                .join('<br>');
         }
 
         function retryQuestion() {
@@ -301,7 +349,7 @@
 
         function nextQuestion() {
             currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
+            if (currentQuestionIndex < originalQuestions.length) {
                 loadQuestion();
             } else {
                 showResult();
@@ -312,14 +360,14 @@
             quizContainer.style.display = 'none';
             resultScreen.style.display = 'block';
 
-            const percentage = Math.round((correctAnswersCount / questions.length) * 100);
+            const percentage = Math.round((correctAnswersCount / originalQuestions.length) * 100);
 
-            document.getElementById('result-score').textContent = `${correctAnswersCount} из 7(SIUUUU)`;
+            document.getElementById('result-score').textContent = `${correctAnswersCount} из 7`;
             document.getElementById('result-text').innerHTML = `
-                Процент правильных ответов: <strong>${percentage}%</strong><br><br>
-                ${percentage >= 90 ? 'Отличный результат! Еблан!' :
-                  percentage >= 70 ? 'Хороший результат! Ещё немного — и будет идеально.' :
-                  'Продолжай тренироваться — ты на правильном пути!'}
+                Процент правильных: <strong>${percentage}%</strong><br><br>
+                ${percentage === 100 ? 'Идеально! Ты мастер сопоставлений!' :
+                  percentage >= 70 ? 'Отлично! Продолжай в том же духе.' :
+                  'Хорошо, ещё немного практики — и будет 100%'}
             `;
         }
     </script>
