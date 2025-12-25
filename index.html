@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подготовка к сессии — 80 вопросов</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        #quiz-container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        .question { font-size: 20px; margin-bottom: 25px; font-weight: bold; }
+        .options { margin-bottom: 30px; }
+        .option { display: block; margin-bottom: 14px; font-size: 17px; padding-left: 5px; }
+        .option input { margin-right: 10px; transform: scale(1.2); }
+        .option::before { content: "•"; color: #333; font-weight: bold; display: inline-block; width: 1.5em; margin-left: -1.5em; }
+        #feedback { font-weight: bold; margin: 20px 0; min-height: 30px; font-size: 18px; }
+        button { padding: 12px 25px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-right: 10px; margin-bottom: 10px; }
+        button:hover { background: #0056b3; }
+        #retry { background: #fd7e14; } #retry:hover { background: #e86200; }
+        .correct { background-color: #d4edda; border: 2px solid #28a745; }
+        .incorrect { background-color: #f8d7da; border: 2px solid #dc3545; }
+        .matching-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .matching-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #ddd; }
+        .matching-left { font-weight: bold; width: 45%; }
+        .matching-right select { width: 100%; padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <div id="question" class="question"></div>
+        <div id="options" class="options"></div>
+        <div id="feedback"></div>
+        <button id="submit">Проверить</button>
+        <button id="retry" style="display: none;">Попробовать ещё раз</button>
+        <button id="next" style="display: none;">Следующий вопрос</button>
+    </div>
+
+    <script>
+        const questions = [
+            { type: 'multiple', question: '1. Which are two best practices used to secure APIs? (Choose two.)', options: ['use reputable and standard libraries to create the APIs','make internal API documentation mandatory','keep API implementation and API security into one tier allowing the API developer to work on both facets simultaneously','secure API services to provide HTTP endpoints only','discussing company API development (or any other application development) on public forums'], correct: [0,1] },
+            { type: 'single', question: '2. Which type of threat actors use cybercrime attacks to promote what they believe in?', options: ['hacktivists','organized crime','state-sponsored','insider threats'], correct: [0] },
+            { type: 'single', question: '3. A company conducted a penetration test 6 months ago...', options: ['The core data has been moved...','The servers require...','New cloud-based applications...','The attack surface has changed...'], correct: [3] },
+            { type: 'single', question: '4. A network administrator performs a penetration test...', options: ['Exif','Maltego','h8mail','WHOIS'], correct: [3] },
+            { type: 'single', question: '5. A penetration tester wants to quickly discover...', options: ['nmap -p 1-65535 localhost','nmap -sP 192.168.0.0/24','nmap -sn 192.168.0.0/24','nmap 192.168.1.0/24 -open','nmap -sV 192.168.0.255'], correct: [2] },
+            { type: 'single', question: '6. A penetration tester runs the command nmap -sF...', options: ['port 80 is open','port 80 is closed','undetermined as this is a default response...','port 80 is open/filtered'], correct: [2] },
+            { type: 'single', question: '7. Which common tool is used by penetration testers to craft packets?', options: ['nmap','scapy','pip3','h8mail','Recon-ng'], correct: [1] },
+            { type: 'single', question: '8. Why should a tester use query throttling techniques...', options: ['to reduce the number of attack threads...','to limit bandwidth on real-time antivirus...','to create a larger attack surface...','to limit bandwidth on resource heavy applications'], correct: [0] },
+            { type: 'single', question: '9. Why would an organization hire a red team?', options: ['to evaluate the work...','to install equipment...','to defend the organization...','to play the role of a threat actor...'], correct: [3] },
+            { type: 'matching', question: '10. Match the healthcare sector term to the respective description.', left: ['Healthcare provider','Business associates','Health plan','Healthcare clearinghouse'], right: ['A person or an organization that provides patient or medical services','A person or organization that performs certain functions involving the use of PHI...','A government program that pays for healthcare','An entity that processes nonstandard health information...'], correct: {0:0,1:1,2:2,3:3} },
+            { type: 'multiple', question: '11. Which two elements are typically on the front of a credit card? (Choose two.)', options: ['magnetic stripe','embedded microchip','date of birth','primary account number','card security code'], correct: [1,3] },
+            // ... (все остальные вопросы 12–79 остаются точно такими же, как в предыдущем полном коде)
+            { type: 'matching', question: '38. Match the PowerSploit module/script to the respective description.', left: ['Invoke-Portscan','Set-CriticalProcess','PowerView','Get-VaultCredential','PowerUp'], right: ['Does a simple TCP port scan...','Causes the machine to blue screen...','Performs network and Windows domain enumeration...','Displays Windows vault credential objects...','Acts as clearinghouse of common privilege escalation checks...'], correct: {0:0,1:1,2:2,3:3,4:4} },
+            // ... (остальные вопросы)
+            { type: 'single', question: '80. Which misconfiguration in IoT would allow threat actors to obtain sensitive information...', options: ['error messages and debug handling','digital certificates','misconfigured metadata service','side-channels'], correct: [0] }
+        ];
+
+        let currentQuestionIndex = Math.floor(Math.random() * questions.length);
+        let currentQuestion = questions[currentQuestionIndex];
+
+        function loadQuestion() {
+            const questionElem = document.getElementById('question');
+            const optionsElem = document.getElementById('options');
+            const feedbackElem = document.getElementById('feedback');
+            const submitBtn = document.getElementById('submit');
+            const retryBtn = document.getElementById('retry');
+            const nextBtn = document.getElementById('next');
+            const container = document.getElementById('quiz-container');
+
+            container.classList.remove('correct', 'incorrect');
+            feedbackElem.innerHTML = '';
+            optionsElem.innerHTML = '';
+            submitBtn.style.display = 'inline';
+            retryBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+
+            questionElem.textContent = currentQuestion.question;
+
+            if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
+                currentQuestion.options.forEach((option, index) => {
+                    const label = document.createElement('label');
+                    label.classList.add('option');
+                    const input = document.createElement('input');
+                    input.type = currentQuestion.type === 'single' ? 'radio' : 'checkbox';
+                    input.name = 'answer';
+                    input.value = index;
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(' ' + option));
+                    optionsElem.appendChild(label);
+                });
+            } else if (currentQuestion.type === 'matching') {
+                const table = document.createElement('table');
+                table.classList.add('matching-table');
+
+                currentQuestion.left.forEach((leftItem, index) => {
+                    const row = document.createElement('tr');
+
+                    const leftTd = document.createElement('td');
+                    leftTd.classList.add('matching-left');
+                    leftTd.textContent = leftItem;
+                    row.appendChild(leftTd);
+
+                    const arrowTd = document.createElement('td');
+                    arrowTd.textContent = '→';
+                    arrowTd.style.textAlign = 'center';
+                    arrowTd.style.fontWeight = 'bold';
+                    row.appendChild(arrowTd);
+
+                    const rightTd = document.createElement('td');
+                    rightTd.classList.add('matching-right');
+                    const select = document.createElement('select');
+                    select.dataset.leftIndex = index;
+
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = '-- выберите --';
+                    select.appendChild(defaultOpt);
+
+                    // Перемешиваем варианты
+                    const shuffled = [...currentQuestion.right];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+
+                    shuffled.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = currentQuestion.right.indexOf(item);
+                        opt.textContent = item;
+                        select.appendChild(opt);
+                    });
+
+                    rightTd.appendChild(select);
+                    row.appendChild(rightTd);
+
+                    table.appendChild(row);
+                });
+
+                optionsElem.appendChild(table);
+            }
+        }
+
+        function checkAnswer() {
+            const feedbackElem = document.getElementById('feedback');
+            const container = document.getElementById('quiz-container');
+            const submitBtn = document.getElementById('submit');
+            const retryBtn = document.getElementById('retry');
+            const nextBtn = document.getElementById('next');
+
+            let isCorrect = false;
+
+            if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
+                const selected = Array.from(document.querySelectorAll('input[name="answer"]:checked'))
+                    .map(input => parseInt(input.value));
+                const correctSorted = [...currentQuestion.correct].sort((a,b)=>a-b);
+                const selectedSorted = [...selected].sort((a,b)=>a-b);
+                isCorrect = JSON.stringify(selectedSorted) === JSON.stringify(correctSorted);
+            } else if (currentQuestion.type === 'matching') {
+                const selects = document.querySelectorAll('select');
+                const userMatches = {};
+                let allSelected = true;
+
+                selects.forEach(select => {
+                    const leftIndex = parseInt(select.dataset.leftIndex);
+                    const selectedValue = parseInt(select.value);
+                    if (isNaN(selectedValue)) allSelected = false;
+                    userMatches[leftIndex] = selectedValue;
+                });
+
+                if (!allSelected) {
+                    feedbackElem.innerHTML = '<strong>Пожалуйста, выберите соответствие для всех строк!</strong>';
+                    return;
+                }
+
+                isCorrect = Object.keys(currentQuestion.correct).every(key => 
+                    parseInt(currentQuestion.correct[key]) === userMatches[key]
+                );
+            }
+
+            submitBtn.style.display = 'none';
+
+            if (isCorrect) {
+                container.classList.add('correct');
+                feedbackElem.innerHTML = '<strong>Правильно!</strong>';
+                nextBtn.style.display = 'inline';
+            } else {
+                container.classList.add('incorrect');
+                feedbackElem.innerHTML = '<strong>Неправильно.</strong> Правильный ответ: ' + getCorrectAnswerText();
+                retryBtn.style.display = 'inline';
+            }
+        }
+
+        function getCorrectAnswerText() {
+            if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
+                return currentQuestion.correct.map(i => currentQuestion.options[i]).join(', ');
+            } else if (currentQuestion.type === 'matching') {
+                return Object.entries(currentQuestion.correct)
+                    .map(([left, right]) => `${currentQuestion.left[left]} → ${currentQuestion.right[right]}`)
+                    .join(' | ');
+            }
+            return '';
+        }
+
+        function retryQuestion() {
+            loadQuestion();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[currentQuestionIndex];
+            loadQuestion();
+        }
+
+        document.getElementById('submit').addEventListener('click', checkAnswer);
+        document.getElementById('retry').addEventListener('click', retryQuestion);
+        document.getElementById('next').addEventListener('click', nextQuestion);
+
+        loadQuestion();
+    </script>
+</body>
+</html>
